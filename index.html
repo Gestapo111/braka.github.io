@@ -1,107 +1,214 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrador de Usuarios</title>
+    <title>User Management</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            justify-content: space-between;
+        }
+        form input {
+            padding: 10px;
+            margin: 10px;
+            width: 45%;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
         }
         th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            color: white;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .btn-red {
+            background-color: #dc3545;
+        }
+        .btn-green {
+            background-color: #28a745;
+        }
+        .counter {
+            color: #ff6347;
         }
     </style>
 </head>
 <body>
-    <h1>Administrador de Usuarios</h1>
-    <button onclick="addUser()">Agregar Usuario</button>
-    <br><br>
-    <table id="usuariosTable">
+
+<div class="container">
+    <h1>User Management</h1>
+
+    <!-- Formulario para agregar un nuevo usuario -->
+    <form id="userForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="phone" placeholder="Phone" required>
+        <button type="submit">Add User</button>
+    </form>
+
+    <!-- Tabla de usuarios -->
+    <table>
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-                <th>Botón WhatsApp</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>WhatsApp</th>
                 <th>Gmail</th>
-                <th>Acciones</th>
+                <th>Actions</th>
+                <th>Days Left</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Los usuarios se mostrarán aquí -->
+        <tbody id="userTableBody">
+            <!-- Los usuarios se agregarán aquí -->
         </tbody>
     </table>
+</div>
 
-    <script>
-        let usuarios = [];
+<script>
+    let users = [];
 
-        function renderTabla() {
-            let tbody = document.querySelector("#usuariosTable tbody");
-            tbody.innerHTML = "";
+    // Función para agregar un nuevo usuario
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let name = document.getElementById('name').value;
+        let phone = document.getElementById('phone').value;
+        let expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30); // Contador de 30 días
+        
+        let user = { name, phone, expirationDate };
+        users.push(user);
+        renderUsers();
+        document.getElementById('userForm').reset();
+    });
 
-            usuarios.forEach((usuario) => {
-                let tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${usuario.nombre}</td>
-                    <td>${usuario.telefono}</td>
-                    <td>${usuario.botones.whatsapp}</td>
-                    <td>${usuario.gmail}</td>
-                    <td>
-                        <button onclick="editarUsuario(${usuarios.indexOf(usuario)})">Editar</button>
-                        <button onclick="eliminarUsuario(${usuarios.indexOf(usuario)})">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    // Función para renderizar la tabla de usuarios
+    function renderUsers() {
+        let userTableBody = document.getElementById('userTableBody');
+        userTableBody.innerHTML = ''; // Limpiar la tabla antes de renderizar
+        
+        users.forEach((user, index) => {
+            let row = document.createElement('tr');
+            
+            // Crear las celdas de nombre y teléfono
+            let nameCell = document.createElement('td');
+            nameCell.innerText = user.name;
+            
+            let phoneCell = document.createElement('td');
+            phoneCell.innerText = user.phone;
+            
+            // Crear botones de WhatsApp y Gmail
+            let whatsappCell = document.createElement('td');
+            let whatsappLink = document.createElement('a');
+            whatsappLink.className = 'btn btn-green';
+            whatsappLink.href = `https://wa.me/${user.phone}`;
+            whatsappLink.target = '_blank';
+            whatsappLink.innerText = 'WhatsApp';
+            whatsappCell.appendChild(whatsappLink);
+            
+            let gmailCell = document.createElement('td');
+            let gmailLink = document.createElement('a');
+            gmailLink.className = 'btn btn-blue';
+            gmailLink.href = `mailto:${user.phone}@gmail.com`;
+            gmailLink.target = '_blank';
+            gmailLink.innerText = 'Gmail';
+            gmailCell.appendChild(gmailLink);
+            
+            // Crear las acciones (editar, borrar)
+            let actionsCell = document.createElement('td');
+            let editButton = document.createElement('button');
+            editButton.className = 'btn';
+            editButton.innerText = 'Edit';
+            editButton.onclick = function() {
+                editUser(index);
+            };
+            
+            let deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-red';
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = function() {
+                deleteUser(index);
+            };
+            
+            actionsCell.appendChild(editButton);
+            actionsCell.appendChild(deleteButton);
+            
+            // Crear la celda de contador de días
+            let daysLeftCell = document.createElement('td');
+            let daysLeft = Math.round((user.expirationDate - new Date()) / (1000 * 60 * 60 * 24));
+            daysLeftCell.innerHTML = `<span class="counter">${daysLeft} days</span>`;
+            
+            // Agregar las celdas a la fila
+            row.appendChild(nameCell);
+            row.appendChild(phoneCell);
+            row.appendChild(whatsappCell);
+            row.appendChild(gmailCell);
+            row.appendChild(actionsCell);
+            row.appendChild(daysLeftCell);
+            
+            // Agregar la fila a la tabla
+            userTableBody.appendChild(row);
+        });
+    }
+
+    // Función para editar un usuario
+    function editUser(index) {
+        let user = users[index];
+        let newName = prompt('Edit Name:', user.name);
+        let newPhone = prompt('Edit Phone:', user.phone);
+        
+        if (newName && newPhone) {
+            users[index].name = newName;
+            users[index].phone = newPhone;
+            renderUsers();
         }
+    }
 
-        function addUser() {
-            let nombre = prompt("Ingresa el nombre del usuario:");
-            let telefono = prompt("Ingresa el teléfono del usuario:");
-            let whatsapp = prompt("Ingresa el botón de WhatsApp para el usuario:");
-            let gmail = prompt("Ingresa la dirección de Gmail para el usuario:");
+    // Función para borrar un usuario
+    function deleteUser(index) {
+        users.splice(index, 1);
+        renderUsers();
+    }
+</script>
 
-            if (nombre && telefono && whatsapp && gmail) {
-                let usuario = {
-                    nombre,
-                    telefono,
-                    botones: { whatsapp },
-                    gmail,
-                    días: 0,
-                };
-
-                usuarios.push(usuario);
-                renderTabla();
-            }
-        }
-
-        function editarUsuario(index) {
-            let nombre = prompt("Ingresa el nuevo nombre del usuario:", usuarios[index].nombre);
-            let telefono = prompt("Ingresa el nuevo teléfono del usuario:", usuarios[index].telefono);
-            let whatsapp = prompt("Ingresa el nuevo botón de WhatsApp para el usuario:", usuarios[index].botones.whatsapp);
-            let gmail = prompt("Ingresa la nueva dirección de Gmail para el usuario:", usuarios[index].gmail);
-
-            if (nombre && telefono && whatsapp && gmail) {
-                usuarios[index].nombre = nombre;
-                usuarios[index].telefono = telefono;
-                usuarios[index].botones.whatsapp = whatsapp;
-                usuarios[index].gmail = gmail;
-                renderTabla();
-            }
-        }
-
-        function eliminarUsuario(index) {
-            if (confirm("¿Estás seguro de eliminar este usuario?")) {
-                usuarios.splice(index, 1);
-                renderTabla();
-            }
-        }
-
-        // Ejecuta el renderizado inicial de la tabla
-        renderTabla();
-    </script>
 </body>
 </html>
