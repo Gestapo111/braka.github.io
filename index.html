@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador de Usuarios</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Administrador de Usuarios</h1>
+    <button onclick="addUser()">Agregar Usuario</button>
+    <br><br>
+    <table id="usuariosTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Botón WhatsApp</th>
+                <th>Gmail</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los usuarios se mostrarán aquí -->
+        </tbody>
+    </table>
+
+    <script>
+        let usuarios = [];
+
+        function renderTabla() {
+            let tbody = document.querySelector("#usuariosTable tbody");
+            tbody.innerHTML = "";
+
+            usuarios.forEach((usuario) => {
+                let tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${usuario.nombre}</td>
+                    <td>${usuario.telefono}</td>
+                    <td>${usuario.botones.whatsapp}</td>
+                    <td>${usuario.gmail}</td>
+                    <td>
+                        <button onclick="editarUsuario(${usuarios.indexOf(usuario)})">Editar</button>
+                        <button onclick="eliminarUsuario(${usuarios.indexOf(usuario)})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addUser() {
+            let nombre = prompt("Ingresa el nombre del usuario:");
+            let telefono = prompt("Ingresa el teléfono del usuario:");
+            let whatsapp = prompt("Ingresa el botón de WhatsApp para el usuario:");
+            let gmail = prompt("Ingresa la dirección de Gmail para el usuario:");
+
+            if (nombre && telefono && whatsapp && gmail) {
+                let usuario = {
+                    nombre,
+                    telefono,
+                    botones: { whatsapp },
+                    gmail,
+                    días: 0,
+                };
+
+                usuarios.push(usuario);
+                renderTabla();
+            }
+        }
+
+        function editarUsuario(index) {
+            let nombre = prompt("Ingresa el nuevo nombre del usuario:", usuarios[index].nombre);
+            let telefono = prompt("Ingresa el nuevo teléfono del usuario:", usuarios[index].telefono);
+            let whatsapp = prompt("Ingresa el nuevo botón de WhatsApp para el usuario:", usuarios[index].botones.whatsapp);
+            let gmail = prompt("Ingresa la nueva dirección de Gmail para el usuario:", usuarios[index].gmail);
+
+            if (nombre && telefono && whatsapp && gmail) {
+                usuarios[index].nombre = nombre;
+                usuarios[index].telefono = telefono;
+                usuarios[index].botones.whatsapp = whatsapp;
+                usuarios[index].gmail = gmail;
+                renderTabla();
+            }
+        }
+
+        function eliminarUsuario(index) {
+            if (confirm("¿Estás seguro de eliminar este usuario?")) {
+                usuarios.splice(index, 1);
+                renderTabla();
+            }
+        }
+
+        // Ejecuta el renderizado inicial de la tabla
+        renderTabla();
+    </script>
+</body>
+</html>
